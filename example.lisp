@@ -1,6 +1,8 @@
 (load "gen.lisp")
 (load "LaTex-writer.lisp")
 
+;;; Example using genexpr and print-tex-expr
+
 (with-open-file (*standard-output* "example.tex"
                                    :direction :output
                                    :if-exists :supersede)
