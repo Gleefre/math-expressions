@@ -4,16 +4,18 @@
 
 (defun tex-expression (expr)
   (labels ((atom->tex (atom)
-             (multiple-value-bind (integer-part fraction-part)
-                 (floor (abs atom))
-               (concatenate 'string
-                            (if (< atom 0) "-")
-                            (if (or (not (zerop integer-part)) (zerop fraction-part))
-                                (write-to-string integer-part))
-                            (if (not (zerop fraction-part))
-                                (format nil "\\frac{~a}{~a}"
-                                        (numerator fraction-part)
-                                        (denominator fraction-part))))))
+             (if (numberp atom)
+                 (multiple-value-bind (integer-part fraction-part)
+                     (floor (abs atom))
+                   (concatenate 'string
+                                (if (< atom 0) "-")
+                                (if (or (not (zerop integer-part)) (zerop fraction-part))
+                                    (write-to-string integer-part))
+                                (if (not (zerop fraction-part))
+                                    (format nil "\\frac{~a}{~a}"
+                                            (numerator fraction-part)
+                                            (denominator fraction-part)))))
+                 (format nil "~a" atom)))
            (operation->tex (expr)
              (case (first expr)
                (+ (format nil "~a + ~a"
