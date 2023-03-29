@@ -2,6 +2,8 @@
 
 ;;; LaTex formula from expression in prefix notation
 
+(defparameter *max-decimal-fraction* 1000)
+
 (defun tex-expression (expr)
   (labels ((atom->tex (atom)
              (if (numberp atom)
@@ -9,12 +11,28 @@
                      (floor (abs atom))
                    (concatenate 'string
                                 (if (< atom 0) "-")
-                                (if (or (not (zerop integer-part)) (zerop fraction-part))
+                                (if (or (not (zerop integer-part))
+                                        (zerop fraction-part)
+                                        (and *max-decimal-fraction*
+                                             (zerop (mod *max-decimal-fraction*
+                                                         (denominator fraction-part)))))
                                     (write-to-string integer-part))
                                 (if (not (zerop fraction-part))
-                                    (format nil "\\frac{~a}{~a}"
-                                            (numerator fraction-part)
-                                            (denominator fraction-part)))))
+                                    (if (and *max-decimal-fraction*
+                                             (zerop (mod *max-decimal-fraction*
+                                                         (denominator fraction-part))))
+                                        (format nil ".~a"
+                                                (string-right-trim
+                                                 "0"
+                                                 (subseq (format nil "~a"
+                                                                 (+ *max-decimal-fraction*
+                                                                    (* (numerator fraction-part)
+                                                                       (/ *max-decimal-fraction*
+                                                                          (denominator fraction-part)))))
+                                                         1)))
+                                        (format nil "\\frac{~a}{~a}"
+                                                (numerator fraction-part)
+                                                (denominator fraction-part))))))
                  (format nil "~a" atom)))
            (operation->tex (expr)
              (case (first expr)
