@@ -29,9 +29,12 @@
     (* #'/)
     ((/ \:) #'*)))
 
-(defun split-rational (func q-rational &key (denom-below 10) (num-below 9))
+(defun split-rational (func q-rational &key (denom-below 10) (num-below 9)
+                                            (denom-above 1) (num-above 1))
   (let ((p-rational (random-rational :denom-below denom-below
                                      :num-below num-below
+                                     :denom-above denom-above
+                                     :num-above num-above
                                      :non-zero (member func '(/ \: *))))
         (inv-func (inverse-func func)))
     (list func (funcall inv-func q-rational p-rational)
@@ -40,17 +43,22 @@
 ;;; Expression generator
 
 (defun genexpr (&key (start 0) (operations (list '+ '* '- '\:))
-                     (denom-below 10) (num-below 9))
+                     (denom-below 10) (num-below 9)
+                     (denom-above 1) (num-above 1))
   (let ((expr (split-rational (first operations)
                               start
                               :denom-below denom-below
-                              :num-below num-below)))
+                              :num-below num-below
+                              :denom-above denom-above
+                              :num-above num-above)))
     (loop for func in (rest operations)
           do (let ((place (random-cons-cell expr)))
                (setf (first place)
                      (split-rational func (first place)
                                      :denom-below denom-below
-                                     :num-below num-below))))
+                                     :num-below num-below
+                                     :denom-above denom-above
+                                     :num-above num-above))))
     expr))
 
 ;;; Converter to infix notation
