@@ -2,11 +2,15 @@
 
 ;;; Random functions
 
-(defun random-between (a b)
-  (+ a (random (- b a -1))))
+(defun random-between (a b &key (non-zero nil))
+  (if (and non-zero (<= a 0 b))
+      (let ((num (random-between a (1- b))))
+        (+ num (if (minusp num) 0 1)))
+      (+ a (random (- b a -1)))))
 
-(defun random-rational (&key (num-above 1) (num-below 100) (denom-above 1) (denom-below 100))
-  (/ (random-between num-above num-below) (random-between denom-above denom-below)))
+(defun random-rational (&key (num-above 1) (num-below 100) (denom-above 1) (denom-below 100) (non-zero nil))
+  (/ (random-between num-above num-below :non-zero non-zero)
+     (random-between denom-above denom-below :non-zero t)))
 
 (defun random-cons-cell (expr)
   (if (null (cdr expr))
@@ -27,7 +31,8 @@
 
 (defun split-rational (func q-rational &key (denom-below 10) (num-below 9))
   (let ((p-rational (random-rational :denom-below denom-below
-                                     :num-below num-below))
+                                     :num-below num-below
+                                     :non-zero (member func '(/ \: *))))
         (inv-func (inverse-func func)))
     (list func (funcall inv-func q-rational p-rational)
           p-rational)))
