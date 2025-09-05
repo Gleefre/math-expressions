@@ -38,30 +38,40 @@
              (case (first expr)
                (+ (format nil "~a + ~a"
                           (expression->tex (second expr))
-                          (expression->tex (third expr))))
+                          (expression->parens-tex (third expr))))
                (- (format nil "~a - ~a"
                           (expression->tex (second expr))
                           (expression->parens-tex (third expr))))
                (* (format nil "~a \\cdot ~a"
                           (expression->parens-tex (second expr))
                           (expression->parens-tex (third expr))))
-               ((/ \:) (format nil "\\frac{~a}{~a}"
-                               (expression->tex (second expr))
-                               (expression->tex (third expr))))
+               (/ (format nil "\\frac{~a}{~a}"
+                          (expression->tex (second expr))
+                          (expression->tex (third expr))))
+               (\: (format nil "~a \\div ~a"
+                           (expression->parens-tex (second expr))
+                           (expression->parens-tex (third expr))))
                (= (format nil "~a = ~a"
                           (expression->tex (second expr))
-                          (expression->tex (third expr))))))
+                          (expression->tex (third expr))))
+               (otherwise (format nil "~a ~a ~a"
+                                  (expression->tex (second expr))
+                                  (first expr)
+                                  (expression->tex (third expr))))))
            (expression->tex (expr)
              (if (atom expr)
                  (atom->tex expr)
                  (operation->tex expr)))
            (expression->parens-tex (expr)
-               (if (atom expr)
-                   (atom->tex expr)
-                   (case (first expr)
-                     ((* \: /) (expression->tex expr))
-                     (otherwise (format nil "\\left(~a\\right)"
-                                        (expression->tex expr)))))))
+             (if (atom expr)
+                 (if (< expr 0)
+                     (format nil "\\left(~a\\right)"
+                             (atom->tex expr))
+                     (atom->tex expr))
+                 (case (first expr)
+                   ((* \: /) (expression->tex expr))
+                   (otherwise (format nil "\\left(~a\\right)"
+                                      (expression->tex expr)))))))
     (expression->tex expr)))
 
 ;;; Prints a number of expressions as LaTex
